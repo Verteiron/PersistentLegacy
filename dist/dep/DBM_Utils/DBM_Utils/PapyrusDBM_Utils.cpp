@@ -450,7 +450,7 @@ namespace papyrusDBM_Utils
 
 	}
 
-	void saveAllDisplayStatus(StaticFunctionTag*, BGSListForm* displayList, bool addContributor = true)
+	void saveDisplayStatusList(StaticFunctionTag*, BGSListForm* displayList, bool addContributor = true)
 	{
 		Json::Value jsonDisplayList = ReadDisplayData();
 
@@ -508,7 +508,10 @@ void papyrusDBM_Utils::RegisterFuncs(VMClassRegistry* registry)
 		new NativeFunction1<StaticFunctionTag, VMResultArray<TESObjectREFR*>, BSFixedString>("getActiveDisplays", "DBM_Utils", papyrusDBM_Utils::getActiveDisplays, registry));
 
 	registry->RegisterFunction(
-		new NativeFunction2<StaticFunctionTag, void, BGSListForm*, bool>("saveAllDisplayStatus", "DBM_Utils", papyrusDBM_Utils::saveAllDisplayStatus, registry));
+		new NativeFunction2<StaticFunctionTag, void, TESObjectREFR*, bool>("saveDisplayStatus", "DBM_Utils", papyrusDBM_Utils::saveDisplayStatus, registry));
+
+	registry->RegisterFunction(
+		new NativeFunction2<StaticFunctionTag, void, BGSListForm*, bool>("saveDisplayStatusList", "DBM_Utils", papyrusDBM_Utils::saveDisplayStatusList, registry));
 
 	registry->RegisterFunction(
 		new NativeFunction1<StaticFunctionTag, VMResultArray<BSFixedString>, BGSListForm*>("getNameBatch", "DBM_Utils", papyrusDBM_Utils::getNameBatch, registry));

@@ -16,10 +16,19 @@ ObjectReference[] Function getActiveDisplays(String asCharacterName = "") native
 */
 }
 
-Function saveAllDisplayStatus(FormList akDisplayList, Bool abAddContributor = True) native global
+Function saveDisplayStatus(ObjectReference akDisplayObject, Bool abAddContributor = True) native global
 {
 /**
-*  @brief 	Writes out the name and enabed status of all the displays in a formlist.
+*  @brief 	Writes out the name and enabled status of the display designated by akDisplayObject.
+*  @param	akDisplayObject		Display to check.
+*  @param	abAddContributor	If true, add the current player to the list of contributors for the display.
+*/
+}
+
+Function saveDisplayStatusList(FormList akDisplayList, Bool abAddContributor = True) native global
+{
+/**
+*  @brief 	Writes out the name and enabled status of all the displays in a formlist.
 *  @param	akDisplayList 		FormList of displays to check.
 *  @param	abAddContributor	If true, add the current player to the list of contributors for the display.
 */
