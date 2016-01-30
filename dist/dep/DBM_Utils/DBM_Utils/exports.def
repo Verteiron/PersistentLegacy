@@ -1,0 +1,4 @@
+LIBRARY	"DBM_Utils"
+EXPORTS
+SKSEPlugin_Query
+SKSEPlugin_Load
