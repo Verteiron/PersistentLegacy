@@ -57,6 +57,8 @@ Function DoFirstLoadScan()
 	; testListNames(MCMScript.DBM_MadMaskerItems)
 	; testListNames(MCMScript.DBM_AetherealItems)
 
+	TestData()
+
 	DebugTrace("...done!")
 EndFunction
 
@@ -78,33 +80,19 @@ EndFunction
 Function TestData()
 	string sPlayerName = Game.GetPlayer().GetActorBase().GetName()
 
-	ObjectReference[] displayList = DBM_Utils.getActiveDisplays("Kmiru")
-	int i = 0
-	while i < displayList.length
-		DebugTrace("DisplayTest: Kmiru has display " + displayList[i])
-		If sPlayerName != "Kmiru"
-			If displayList[i].GetLinkedRef()
-				displayList[i].GetLinkedRef().EnableNoWait(True)
-			Else
-				displayList[i].EnableNoWait(True)
-			EndIf
-		EndIf
-		i += 1
-	endWhile
+	String[] sContributorList = DBM_Utils.getContributors()
 
-	displayList = DBM_Utils.getActiveDisplays("Magraz")
-	i = 0
-	while i < displayList.length
-		Debug.Trace("DisplayTest: Magraz has display " + displayList[i])
-		If sPlayerName != "Magraz"
-			If displayList[i].GetLinkedRef()
-				displayList[i].GetLinkedRef().EnableNoWait(True)
-			Else
-				displayList[i].EnableNoWait(True)
-			EndIf
-		EndIf
-		i += 1
-	endWhile
+	int n = 0
+	while n < sContributorList.length
+		ObjectReference[] displayList = DBM_Utils.getActiveDisplays(sContributorList[n])
+		int i = 0
+		while i < displayList.length
+			DebugTrace("DisplayTest: " + sContributorList[n] + " has display " + displayList[i])
+			i += 1
+		endWhile
+		n += 1
+	EndWhile
+
 EndFunction
 
 Function testListNames(FormList akFormList) Global

@@ -7,6 +7,14 @@ Function TraceConsole(String asTrace) native global
 String Function userDirectory() native global
 {Returns "%UserProfile%/My Documents/My Games/Skyrim/DBM_Utils".}
 
+String[] Function getContributors() native global
+{
+/**
+*  @brief 	Get an array of Strings containing all the names of characters that have contributed a Display.
+*  @return	Array of Strings containing contributor names.
+*/
+}
+
 ObjectReference[] Function getActiveDisplays(String asCharacterName = "") native global
 {
 /**

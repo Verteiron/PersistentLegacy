@@ -1,6 +1,7 @@
 #include <functional>
 #include <random>
 #include <algorithm>
+#include <set>
 
 #include "skse/GameData.h"
 #include "skse/GameExtraData.h"
@@ -369,7 +370,7 @@ bool saveDisplayStatus(Json::Value &jsonDisplayList, TESObjectREFR* pObject, con
 			jsonDisplayData["name"] = name.c_str();
 		}
 
-		//If playerNAme is set, add the player's name to the list
+		//If playerName is set, add the player's name to the list
 		if (playerName)
 		{
 			Json::Value jsonContributors;
@@ -406,6 +407,28 @@ namespace papyrusDBM_Utils
 	
 	BSFixedString userDirectory(StaticFunctionTag*) {
 		return GetUserDirectory().c_str();
+	}
+
+	VMResultArray<BSFixedString> getContributors(StaticFunctionTag*)
+	{
+		VMResultArray<BSFixedString> results;
+		std::set<std::string> resultSet;
+		
+		Json::Value jsonDisplayList = ReadDisplayData();
+
+		for (auto & jsonDisplay : jsonDisplayList.getMemberNames())
+		{
+			for (auto & contributor : jsonDisplayList[jsonDisplay.c_str()]["contributors"])
+			{
+				resultSet.insert(contributor.asString()); // Set will automagically prevent duplicates. Supposedly faster.
+			}
+		}
+		
+		for (auto & contributor : resultSet)
+		{
+			results.push_back(contributor.c_str());
+		}
+		return results;
 	}
 
 	VMResultArray<TESObjectREFR*> getActiveDisplays(StaticFunctionTag*, BSFixedString characterName)
@@ -503,6 +526,9 @@ void papyrusDBM_Utils::RegisterFuncs(VMClassRegistry* registry)
 
 	registry->RegisterFunction(
 		new NativeFunction0<StaticFunctionTag, BSFixedString>("userDirectory", "DBM_Utils", papyrusDBM_Utils::userDirectory, registry));
+
+	registry->RegisterFunction(
+		new NativeFunction0<StaticFunctionTag, VMResultArray<BSFixedString>>("getContributors", "DBM_Utils", papyrusDBM_Utils::getContributors, registry));
 
 	registry->RegisterFunction(
 		new NativeFunction1<StaticFunctionTag, VMResultArray<TESObjectREFR*>, BSFixedString>("getActiveDisplays", "DBM_Utils", papyrusDBM_Utils::getActiveDisplays, registry));
