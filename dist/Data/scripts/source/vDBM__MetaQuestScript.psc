@@ -34,7 +34,6 @@ Int _iCurrentVersion
 String _sCurrentVersion
 
 Bool _ShowedSKSEWarning = False
-Bool _ShowedJContainersWarning = False
 Bool _Running
 Bool _bVersionSystemUpdated = False
 
@@ -167,17 +166,10 @@ EndFunction
 Bool Function CheckDependencies()
 	Float fSKSE = SKSE.GetVersion() + SKSE.GetVersionMinor() * 0.01 + SKSE.GetVersionBeta() * 0.0001
 	DebugTrace("SKSE is version " + fSKSE)
-	DebugTrace("JContainers is version " + SKSE.GetPluginVersion("Jcontainers") + ", API is " + JContainers.APIVersion())
 	DebugTrace("DBM_Utils is version " + SKSE.GetPluginVersion("DBM_Utils"))
 	;Debug.MessageBox("SKSE version is " + fSKSE)
 	If fSKSE < 1.0702
 		Debug.MessageBox("SuperStash\nThis mod requires SKSE 1.7.2 or higher, but it seems to be missing or out of date.\nThe mod will now shut down.")
-		Return False
-	Else
-		;Proceed
-	EndIf
-	If JContainers.APIVersion() < 3
-		Debug.MessageBox("SuperStash\nThis mod requires JContainers with API 3 (3.1.x), but it seems to be missing or out of date.\nThe mod will now shut down.")
 		Return False
 	Else
 		;Proceed
