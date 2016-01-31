@@ -22,6 +22,13 @@ Actor Property PlayerRef Auto
 ;=== Functions ===--
 
 Function DoFirstLoadScan()
+;
+; This is a hack on a number of reasons. The best way to do this would probably be to 
+; have a function in Legacy somewhere that always returns a list of all the formlists
+; that need to be checked, so they can be iterated. Or just merge this functionality
+; into Legacy directly.
+;
+
 	DebugTrace("Scanning all displays...")
 	DBM_MCMScript MCMScript = Quest.GetQuest("DBM_MCMMenu") as DBM_MCMScript
 
@@ -41,43 +48,48 @@ Function DoFirstLoadScan()
 	DBM_Utils.saveDisplayStatusList(MCMScript.DBM_MadMaskerDisplays)
 	DBM_Utils.saveDisplayStatusList(MCMScript.DBM_AetherealDisplays)
 
-	; testListNames(MCMScript.DisplayItems)
-	; testListNames(MCMScript.DBM_DaedricItems)
-	; testListNames(MCMScript.DBM_HOLEItems)
-	; testListNames(MCMScript.OddityItems)
-	; testListNames(MCMScript.DBM_HOSItems)
-	; testListNames(MCMScript.DBM_BCSItems)
-	; testListNames(MCMScript.DBM_UTItems)
-	; testListNames(MCMScript.DBM_JARItems)
-	; testListNames(MCMScript.DBM_ShellList)
-	; testListNames(MCMScript.DBM_MILItems)
-	; testListNames(MCMScript.DBM_HeadsItems)
-	; testListNames(MCMScript.GemstoneList)
-	; testListNames(MCMScript.DBM_FishItems)
-	; testListNames(MCMScript.DBM_MadMaskerItems)
-	; testListNames(MCMScript.DBM_AetherealItems)
-
 	TestData()
 
 	DebugTrace("...done!")
 EndFunction
 
 Function SetDisplaysActive()
-	ObjectReference[] kDisplayList = DBM_Utils.getActiveDisplays()
-	Int i = kDisplayList.Length
-	While i > 0
-		i -= 1
-		ObjectReference kDisplayObj = kDisplayList[i]
-		If kDisplayObj
-			If kDisplayObj.IsDisabled()
-				DebugTrace("Enabling " + kDisplayObj + " (" + kDisplayObj.GetBaseObject().GetName() + ")")
-				kDisplayObj.EnableNoWait()
-			EndIf
+;
+; This just activates all displays activated by other characters.
+; It does not DE-activate displays removed by other characters. That will takes
+; some additional work, either deactivating everything and reactivating it, or 
+; something extra in the SKSE plugin itself.
+;
+
+	string sPlayerName = PlayerREF.GetActorBase().GetName()
+
+	String[] sContributorList = DBM_Utils.getContributors()
+
+	Int n = 0
+	While n < sContributorList.length
+		If sPlayerName != sContributorList[n]
+			ObjectReference[] kDisplayList = DBM_Utils.getActiveDisplays()
+			Int i = kDisplayList.Length
+			While i > 0
+				i -= 1
+				ObjectReference kDisplayObj = kDisplayList[i]
+				If kDisplayObj
+					If kDisplayObj.IsDisabled()
+						DebugTrace("Enabling " + kDisplayObj + "!")
+						kDisplayObj.EnableNoWait()
+					EndIf
+				EndIf
+			EndWhile
 		EndIf
+		n += 1
 	EndWhile
+
 EndFunction
 
 Function TestData()
+;
+; Just prints some test data to the debug log.
+;
 	string sPlayerName = Game.GetPlayer().GetActorBase().GetName()
 
 	String[] sContributorList = DBM_Utils.getContributors()
@@ -96,6 +108,9 @@ Function TestData()
 EndFunction
 
 Function testListNames(FormList akFormList) Global
+;
+; Just prints some test data to the debug log.
+;
 	String[] sNameList = DBM_Utils.GetNameBatch(akFormList)
 	Int i = 0
 	While i < sNameList.Length
