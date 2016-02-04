@@ -1,5 +1,5 @@
 @echo off
-SET FILENAME=PersistentLegacy
+SET FILENAME=DBM_PersistentLegacy
 SET ZEXE=c:\Program Files\7-Zip\7z.exe
 
 for /f "tokens=1,2,3,4 delims=^/ " %%W in ('@echo %date%') DO SET NEWTIME=%%Z-%%X-%%Y
