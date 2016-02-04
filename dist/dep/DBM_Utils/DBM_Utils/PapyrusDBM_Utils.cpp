@@ -252,7 +252,7 @@ std::string getName(TESObjectREFR* pObject)
 {
 	TESObjectREFR* pLinkedObject = nullptr;
 	
-	ExtraLinkedRefChildren* pLinkedChildren = static_cast<ExtraLinkedRefChildren*>(pObject->extraData.GetByType(kExtraData_LinkedRefChildren));
+	ExtraLinkedRefChildren* pLinkedChildren = DYNAMIC_CAST(pObject->extraData.GetByType(kExtraData_LinkedRefChildren), BSExtraData, ExtraLinkedRefChildren);
 	if (pLinkedChildren)
 	{
 		pLinkedObject = pLinkedChildren->GetReference();
@@ -308,7 +308,7 @@ std::string getName(TESObjectREFR* pObject)
 		if (!name || strlen(name) == 0)
 		{
 			_MESSAGE("Name retrieval: Trying pObject as ExtraTextDisplayData...");
-			ExtraTextDisplayData* extraText = static_cast<ExtraTextDisplayData*>(pObject->extraData.GetByType(kExtraData_TextDisplayData));
+			ExtraTextDisplayData* extraText = DYNAMIC_CAST(pObject->extraData.GetByType(kExtraData_TextDisplayData), BSExtraData, ExtraTextDisplayData);
 			if (extraText)
 			{
 				name = extraText->name.data;
