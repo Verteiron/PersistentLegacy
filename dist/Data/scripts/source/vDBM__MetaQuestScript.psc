@@ -111,6 +111,7 @@ Function DoUpkeep(Bool DelayedStart = True)
 		;FIXME: Do init stuff in other quests
 		DebugTrace("Loaded, no updates.")
 	EndIf
+	DataManager.DisableInactiveDisplays()
 	DataManager.SetDisplaysActive()
 	DebugTrace("Upkeep complete!")
 	Ready = True

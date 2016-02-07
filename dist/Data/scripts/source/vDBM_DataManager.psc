@@ -76,7 +76,7 @@ Function SetDisplaysActive()
 				If kDisplayObj
 					If kDisplayObj.IsDisabled()
 						DebugTrace("Enabling " + kDisplayObj + "!")
-						kDisplayObj.EnableNoWait()
+						kDisplayObj.EnableNoWait(True)
 					EndIf
 				EndIf
 			EndWhile
@@ -84,6 +84,42 @@ Function SetDisplaysActive()
 		n += 1
 	EndWhile
 
+EndFunction
+
+Function DisableInactiveDisplays()
+;
+; Get a list of all currently enabled displays that should be disabled, then 
+; disable them.
+;
+
+	DebugTrace("Scanning all displays for ones to disable...")
+	DBM_MCMScript MCMScript = Quest.GetQuest("DBM_MCMMenu") as DBM_MCMScript
+
+	DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DisplayActivators))
+	DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_DaedricDisplays))
+	DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_HOLEDisplays))
+	DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.OddityDisplays))
+	DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_HOSDisplays))
+	DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_BCSDisplays))
+	DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_UTDisplays))
+	DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_JARDisplays))
+	DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_ShellDisplays))
+	DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_MILDisplays))
+	DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_HeadsDisplays))
+	DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.GemstoneDisplays))
+	DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_FishDisplays))
+	DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_MadMaskerDisplays))
+	DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_AetherealDisplays))
+
+EndFunction
+
+Function DisableArray(Objectreference[] akObjectList)
+	Int n = akObjectList.Length
+	While n > 0
+		n -= 1
+		DebugTrace("Disabling " + akObjectList[n] + "!")
+		akObjectList[n].DisableNoWait(True)
+	EndWhile
 EndFunction
 
 Function TestData()

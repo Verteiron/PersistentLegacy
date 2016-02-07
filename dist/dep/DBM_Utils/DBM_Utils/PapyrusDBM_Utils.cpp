@@ -457,7 +457,6 @@ namespace papyrusDBM_Utils
 		return results;
 	}
 
-
 	void saveDisplayStatus(StaticFunctionTag*, TESObjectREFR* pObject, bool addContributor = true)
 	{
 		Json::Value jsonDisplayList = ReadDisplayData();
@@ -495,6 +494,22 @@ namespace papyrusDBM_Utils
 		
 	}
 
+	VMResultArray<TESObjectREFR*> getUnwantedDisplays(StaticFunctionTag*, BGSListForm* displayList)
+	{
+		VMResultArray<TESObjectREFR*> results;
+		Json::Value jsonDisplayList = ReadDisplayData();
+
+		VisitFormList(displayList, [&](TESForm * form) {
+			TESObjectREFR * pObject = DYNAMIC_CAST(form, TESForm, TESObjectREFR);
+			if (pObject) {
+				std::string formString = GetJCFormString(pObject);
+				if (!(pObject->flags & TESForm::kFlagUnk_0x800) && !jsonDisplayList.isMember(formString.c_str()))
+					results.push_back(pObject); //Object is Enabled, but not on the saved list
+			}
+		});
+
+		return results;
+	}
 
 	VMResultArray<BSFixedString> getNameBatch(StaticFunctionTag*, BGSListForm* displayList)
 	{
@@ -532,6 +547,9 @@ void papyrusDBM_Utils::RegisterFuncs(VMClassRegistry* registry)
 
 	registry->RegisterFunction(
 		new NativeFunction1<StaticFunctionTag, VMResultArray<TESObjectREFR*>, BSFixedString>("getActiveDisplays", "DBM_Utils", papyrusDBM_Utils::getActiveDisplays, registry));
+
+	registry->RegisterFunction(
+		new NativeFunction1<StaticFunctionTag, VMResultArray<TESObjectREFR*>, BGSListForm*>("getUnwantedDisplays", "DBM_Utils", papyrusDBM_Utils::getUnwantedDisplays, registry));
 
 	registry->RegisterFunction(
 		new NativeFunction2<StaticFunctionTag, void, TESObjectREFR*, bool>("saveDisplayStatus", "DBM_Utils", papyrusDBM_Utils::saveDisplayStatus, registry));

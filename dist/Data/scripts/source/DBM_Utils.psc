@@ -24,6 +24,15 @@ ObjectReference[] Function getActiveDisplays(String asCharacterName = "") native
 */
 }
 
+ObjectReference[] Function getUnwantedDisplays(FormList akDisplayList) native global
+{
+/**
+*  @brief 	Get an array with the Displays to be disabled based on the saved data.
+*  @param	akDisplayList 		FormList of displays to check.
+*  @return	Array of ObjectReferences that should be disabled in the current game.
+*/
+}
+
 Function saveDisplayStatus(ObjectReference akDisplayObject, Bool abAddContributor = True) native global
 {
 /**
