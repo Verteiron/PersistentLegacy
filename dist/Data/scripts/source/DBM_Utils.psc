@@ -7,6 +7,14 @@ Function TraceConsole(String asTrace) native global
 String Function userDirectory() native global
 {Returns "%UserProfile%/My Documents/My Games/Skyrim/DBM_Utils".}
 
+Function deleteDisplayData() native global
+{
+/**
+*  @brief 	Remove all display data and remove the DBM_Utils folder from MyGames/Skyrim.
+*  @note 	Don't call this unless you mean it, it really does wipe out everything!
+*/
+}
+
 String[] Function getContributors() native global
 {
 /**

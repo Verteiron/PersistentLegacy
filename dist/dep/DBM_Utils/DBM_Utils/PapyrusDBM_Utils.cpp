@@ -1,3 +1,4 @@
+#include <direct.h>
 #include <functional>
 #include <random>
 #include <algorithm>
@@ -158,6 +159,16 @@ bool WriteDisplayData(Json::Value jDisplayList)
 
 	currentFile.WriteBuf(jsonString.c_str(), jsonString.length());
 	currentFile.Close();
+
+	return false;
+}
+
+bool DeleteDisplayData()
+{
+	char filePath[MAX_PATH];
+	sprintf_s(filePath, "%s/DBM_MuseumData.json", GetUserDirectory().c_str());
+	DeleteFile(filePath);
+	_rmdir(GetUserDirectory().c_str());
 
 	return false;
 }
@@ -409,6 +420,10 @@ namespace papyrusDBM_Utils
 		return GetUserDirectory().c_str();
 	}
 
+	void deleteDisplayData(StaticFunctionTag*) {
+		DeleteDisplayData();
+	}
+
 	VMResultArray<BSFixedString> getContributors(StaticFunctionTag*)
 	{
 		VMResultArray<BSFixedString> results;
@@ -541,6 +556,9 @@ void papyrusDBM_Utils::RegisterFuncs(VMClassRegistry* registry)
 
 	registry->RegisterFunction(
 		new NativeFunction0<StaticFunctionTag, BSFixedString>("userDirectory", "DBM_Utils", papyrusDBM_Utils::userDirectory, registry));
+
+	registry->RegisterFunction(
+		new NativeFunction0<StaticFunctionTag, void>("deleteDisplayData", "DBM_Utils", papyrusDBM_Utils::deleteDisplayData, registry));
 
 	registry->RegisterFunction(
 		new NativeFunction0<StaticFunctionTag, VMResultArray<BSFixedString>>("getContributors", "DBM_Utils", papyrusDBM_Utils::getContributors, registry));

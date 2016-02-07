@@ -115,7 +115,6 @@ Function DoUpkeep(Bool DelayedStart = True)
 	DataManager.SetDisplaysActive()
 	DebugTrace("Upkeep complete!")
 	Ready = True
-
 EndFunction
 
 Function DoInit()
