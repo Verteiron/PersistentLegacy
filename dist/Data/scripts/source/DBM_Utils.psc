@@ -1,6 +1,11 @@
 Scriptname DBM_Utils Hidden
 {Series of utility functions provided by the SKSE plugin.}
 
+Int Function getScriptVersion() global
+{Return version of the script. Use to test for existence of the plugin, too.}
+	Return 1
+EndFunction
+
 Function TraceConsole(String asTrace) native global
 {Print a string to the console.}
 
