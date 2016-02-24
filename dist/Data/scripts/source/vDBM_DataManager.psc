@@ -71,7 +71,7 @@ Function SetDisplaysActive()
 
 	Int n = 0
 	While n < sContributorList.length
-		If sPlayerName != sContributorList[n]
+		If sPlayerName != sContributorList[n] ; Do not enable our own displays, they should already be enabled!
 			ObjectReference[] kDisplayList = DBM_Utils.getActiveDisplays()
 			Int i = kDisplayList.Length
 			While i > 0
@@ -148,6 +148,22 @@ Function TestData()
 		endWhile
 		n += 1
 	EndWhile
+
+	ObjectReference[] displayList = DBM_Utils.getActiveDisplays() ; get ALL active displays
+	n = 0
+	while n < displayList.length
+		sContributorList = DBM_Utils.getContributorsForDisplay(displayList[n])
+		if sContributorList.length
+			string sContribCommas = sContributorList[0]
+			int i = 1
+			while i < sContributorList.length
+				sContribCommas += ", " + sContributorList[i]
+				i += 1
+			endWhile
+			DebugTrace("DisplayTest: Contributors for " + displayList[n] + " are " + sContribCommas + "!")
+		endIf
+		n += 1
+	endWhile
 
 EndFunction
 

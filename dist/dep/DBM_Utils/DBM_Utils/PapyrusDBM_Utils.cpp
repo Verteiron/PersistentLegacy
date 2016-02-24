@@ -487,6 +487,26 @@ namespace papyrusDBM_Utils
 		return results;
 	}
 
+	VMResultArray<BSFixedString> getContributorsForDisplay(StaticFunctionTag*, TESObjectREFR* pObject)
+	{
+		VMResultArray<BSFixedString> results;
+		std::set<std::string> resultSet;
+
+		if (!pObject)
+			return results;
+
+		Json::Value jsonDisplayList = ReadDisplayData();
+		std::string formString = GetJCFormString(pObject);
+
+		for (auto & contributor : jsonDisplayList[formString.c_str()]["contributors"])
+		{
+			if (!contributor.asString().empty())
+				results.push_back(contributor.asString().c_str());
+		}
+		
+		return results;
+	}
+
 	VMResultArray<TESObjectREFR*> getActiveDisplays(StaticFunctionTag*, BSFixedString characterName)
 	{
 		VMResultArray<TESObjectREFR*> results;
@@ -603,6 +623,9 @@ void papyrusDBM_Utils::RegisterFuncs(VMClassRegistry* registry)
 
 	registry->RegisterFunction(
 		new NativeFunction0<StaticFunctionTag, VMResultArray<BSFixedString>>("getContributors", "DBM_Utils", papyrusDBM_Utils::getContributors, registry));
+
+	registry->RegisterFunction(
+		new NativeFunction1<StaticFunctionTag, VMResultArray<BSFixedString>, TESObjectREFR*>("getContributorsForDisplay", "DBM_Utils", papyrusDBM_Utils::getContributorsForDisplay, registry));
 
 	registry->RegisterFunction(
 		new NativeFunction1<StaticFunctionTag, VMResultArray<TESObjectREFR*>, BSFixedString>("getActiveDisplays", "DBM_Utils", papyrusDBM_Utils::getActiveDisplays, registry));

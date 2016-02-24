@@ -28,6 +28,15 @@ String[] Function getContributors() native global
 */
 }
 
+String[] Function getContributorsForDisplay(ObjectReference akDisplayObject) native global
+{
+/**
+*  @brief 	Get an array of Strings containing all the names of characters that have contributed the specified Display.
+*  @param	akDisplayObject		Display to check.
+*  @return	Array of Strings containing contributor names.
+*/
+}
+
 ObjectReference[] Function getActiveDisplays(String asCharacterName = "") native global
 {
 /**
