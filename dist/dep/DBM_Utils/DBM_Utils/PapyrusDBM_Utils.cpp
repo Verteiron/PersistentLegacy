@@ -97,6 +97,47 @@ void VisitFormList(BGSListForm * formList, std::function<void(TESForm*)> functor
 	}
 }
 
+void VisitFormListRecursive(BGSListForm * formList, std::function<void(TESForm*)> functor, UInt8 recurseMax = 3)
+{
+	if (recurseMax <= 0) {
+		_WARNING("%s: Too many recursions, aborting!", __FUNCTION__);
+		return;
+	}
+	_MESSAGE("%s: Checking formlist %08x, recursion %d of 3...", __FUNCTION__, formList->formID, 3 - recurseMax);
+	for (int i = 0; i < formList->forms.count; i++)
+	{
+		TESForm* childForm = NULL;
+		if (formList->forms.GetNthItem(i, childForm))
+		{
+			BGSListForm* childList = NULL;
+			childList = DYNAMIC_CAST(childForm, TESForm, BGSListForm);
+			if (childList) {
+				_MESSAGE("%s: Recursing into formlist %08x...", __FUNCTION__, formList->formID);
+				VisitFormListRecursive(childList, functor, recurseMax - 1);
+			} else
+				functor(childForm);
+		}
+	}
+
+	// Script Added Forms
+	if (formList->addedForms) {
+		for (int i = 0; i < formList->addedForms->count; i++) {
+			UInt32 formid = 0;
+			formList->addedForms->GetNthItem(i, formid);
+			TESForm* childForm = LookupFormByID(formid);
+			if (childForm) {
+				BGSListForm* childList = NULL;
+				childList = DYNAMIC_CAST(childForm, TESForm, BGSListForm);
+				if (childList) {
+					VisitFormListRecursive(formList, functor, recurseMax - 1);
+				}
+				else
+					functor(childForm);
+			}
+		}
+	}
+}
+
 bool LoadJsonFromFile(const char * filePath, Json::Value &jsonData)
 {
 	IFileStream		currentFile;
@@ -497,7 +538,7 @@ namespace papyrusDBM_Utils
 		if (pPlayerName)
 			playerName = pPlayerName->name.data;
 		
-		VisitFormList(displayList, [&](TESForm * form){
+		VisitFormListRecursive(displayList, [&](TESForm * form){
 			TESObjectREFR * pObject = DYNAMIC_CAST(form, TESForm, TESObjectREFR);
 			if (pObject) {
 				if (!saveDisplayStatus(jsonDisplayList, pObject, addContributor ? playerName : nullptr))
@@ -514,7 +555,7 @@ namespace papyrusDBM_Utils
 		VMResultArray<TESObjectREFR*> results;
 		Json::Value jsonDisplayList = ReadDisplayData();
 
-		VisitFormList(displayList, [&](TESForm * form) {
+		VisitFormListRecursive(displayList, [&](TESForm * form) {
 			TESObjectREFR * pObject = DYNAMIC_CAST(form, TESForm, TESObjectREFR);
 			if (pObject) {
 				std::string formString = GetJCFormString(pObject);
