@@ -465,6 +465,43 @@ namespace papyrusDBM_Utils
 		DeleteDisplayData();
 	}
 
+	void deleteContributor(StaticFunctionTag*, BSFixedString characterName)
+	{
+		Json::Value jsonDisplayList = ReadDisplayData();
+		
+		for (auto & jsonDisplay : jsonDisplayList.getMemberNames())
+		{
+			Json::Value jsonDisplayData = jsonDisplayList[jsonDisplay.c_str()];
+			Json::Value jsonContributors;
+			if (jsonDisplayData.isMember("contributors"))
+				jsonContributors = jsonDisplayData["contributors"];
+			
+			//Remove this character as a contributor
+			for (int index = 0; index < jsonContributors.size(); ++index)
+			{
+				if (jsonContributors[index].asString() == characterName.data)
+				{
+					_MESSAGE("Removing %s from list of contributors.", characterName.data);
+					Json::Value removed;
+					jsonContributors.removeIndex(index, &removed);
+					index--; //duplicate names shouldn't be a thing, but you never know
+					jsonDisplayData["contributors"] = jsonContributors;
+				}
+			}
+
+			//If this character was the only contributor, remove the entry entirely
+			if (!jsonDisplayData.isMember("contributors") || (jsonDisplayData.isMember("contributors") && !jsonContributors.size()))
+			{
+				_MESSAGE("Last contributor was removed, deleting entry for %s!", jsonDisplay.c_str());
+				jsonDisplayList.removeMember(jsonDisplay.c_str());
+			}
+			else {
+				jsonDisplayList[jsonDisplay.c_str()] = jsonDisplayData;
+			}
+		}
+		WriteDisplayData(jsonDisplayList);
+	}
+
 	VMResultArray<BSFixedString> getContributors(StaticFunctionTag*)
 	{
 		VMResultArray<BSFixedString> results;
@@ -546,6 +583,7 @@ namespace papyrusDBM_Utils
 		if (!saveDisplayStatus(jsonDisplayList, pObject, addContributor ? playerName : nullptr))
 			_WARNING("Problem saving Display with FormID %08x", pObject->formID);
 
+		WriteDisplayData(jsonDisplayList);
 	}
 
 	void saveDisplayStatusList(StaticFunctionTag*, BGSListForm* displayList, bool addContributor = true)
@@ -620,6 +658,9 @@ void papyrusDBM_Utils::RegisterFuncs(VMClassRegistry* registry)
 
 	registry->RegisterFunction(
 		new NativeFunction0<StaticFunctionTag, void>("deleteDisplayData", "DBM_Utils", papyrusDBM_Utils::deleteDisplayData, registry));
+
+	registry->RegisterFunction(
+		new NativeFunction1<StaticFunctionTag, void, BSFixedString>("deleteContributor", "DBM_Utils", papyrusDBM_Utils::deleteContributor, registry));
 
 	registry->RegisterFunction(
 		new NativeFunction0<StaticFunctionTag, VMResultArray<BSFixedString>>("getContributors", "DBM_Utils", papyrusDBM_Utils::getContributors, registry));

@@ -20,6 +20,14 @@ Function deleteDisplayData() native global
 */
 }
 
+Function deleteContributor(String asCharacterName) native global
+{
+/**
+*  @brief 	Remove all Display data for the character specified.
+*  @param	asCharacterName 		Name of the character.
+*/
+}
+
 String[] Function getContributors() native global
 {
 /**
