@@ -5,5 +5,5 @@ Scriptname vDBM_PlayerLoadGameAliasScript extends ReferenceAlias
 
 Event OnPlayerLoadGame()
 {Send OnGameReload event to the owning quest.}
-	(GetOwningQuest() as vDBM__MetaQuestScript).OnGameReload()
+	(GetOwningQuest() as vDBM_DataManager).OnGameReload()
 EndEvent

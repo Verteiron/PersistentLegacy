@@ -17,52 +17,135 @@ Import Game
 
 ;=== Properties ===--
 
-Actor Property PlayerRef Auto
+Actor 			Property PlayerRef 				Auto
+
+FormList 		Property DBM_DisplayLists		Auto
+
+GlobalVariable	Property DBMV_SharingEnabled 	Auto
+
+Int 			Property ScriptVersion 			Auto Hidden
 
 ;=== Functions ===--
 
+Event OnInit()
+	If IsRunning()
+		RegisterForSingleUpdate(1)
+	EndIf
+EndEvent
+
+Event OnUpdate()
+	DoUpkeep()	
+EndEvent
+
+Event OnGameReload()
+;Called by PlayerLoadGameAlias
+	DebugTrace("OnGameReload")
+	DoUpkeep()
+EndEvent
+
+Event OnDBM_Message(string eventName, string strArg, float numArg, Form sender)
+	DebugTrace("Processing DBM_Message " + strArg)
+	If strArg == "startSharing"
+		DBMV_SharingEnabled.SetValue(1)
+		DoFirstLoadScan()
+		EnableActiveDisplays()
+	ElseIf strArg == "stopSharing"
+		DBMV_SharingEnabled.SetValue(0)
+		DisableOtherDisplays()
+		DBM_Utils.deleteContributor(PlayerREF.GetActorBase().GetName())
+	ElseIf strArg == "doFullScan"
+		DBMV_SharingEnabled.SetValue(0)
+		DisableOtherDisplays()
+		DoFirstLoadScan()
+		If DBMV_SharingEnabled.GetValue() == 1
+			EnableActiveDisplays()
+		EndIf
+	ElseIf strArg == "delayedTest"
+		DebugTrace("starting test!")
+		WaitMenuMode(3)
+		TestData()
+		WaitMenuMode(2)
+		DebugTrace("getSharingEnabled() returns " + DBM_Utils.getSharingEnabled())
+		WaitMenuMode(5)
+		SendModEvent("DBM_Message","startSharing")
+		WaitMenuMode(5)
+		DebugTrace("getSharingEnabled() returns " + DBM_Utils.getSharingEnabled())
+		WaitMenuMode(5)
+		SendModEvent("DBM_Message","stopSharing")
+		WaitMenuMode(5)
+		DebugTrace("getSharingEnabled() returns " + DBM_Utils.getSharingEnabled())
+		DebugTrace("test complete!")
+	EndIf
+EndEvent
+
+Function DoUpkeep()
+	DebugTrace("Doing upkeep...")
+	Int iScriptVersion = 1 ;Inc this whenever update code needs to be run
+	If !ScriptVersion
+		DoInit()
+	ElseIf iScriptVersion != ScriptVersion
+		DoUpdate(ScriptVersion)
+	EndIf
+	ScriptVersion = iScriptVersion
+	RegisterForModEvent("DBM_Message", "OnDBM_Message")
+
+	If DBMV_SharingEnabled.GetValue() == 1
+		DisableInactiveDisplays()
+		EnableActiveDisplays()
+	EndIf
+
+	SendModEvent("DBM_Message", "delayedTest")
+
+	DebugTrace("Finished upkeep!")
+EndFunction
+
+Function DoInit()
+; First run on this session
+	DebugTrace("First time run!")
+	;Disable old standalone version of Persistent Legacy scripts.
+	Quest vDBM__MetaQuest = Quest.GetQuest("vDBM__MetaQuest")
+	If vDBM__MetaQuest
+		If vDBM__MetaQuest.IsRunning()
+			DebugTrace("Found old version of vDBM__MetaQuest running, shutting it down...")
+			vDBM__MetaQuest.Stop()
+		EndIf
+	EndIf
+	Quest vDBM_DataManagerQuest = Quest.GetQuest("vDBM_DataManagerQuest")
+	If vDBM_DataManagerQuest
+		If vDBM_DataManagerQuest.IsRunning()
+			DebugTrace("Found old version of vDBM_DataManagerQuest running, shutting it down...")
+			vDBM_DataManagerQuest.Stop()
+		EndIf
+	EndIf
+
+	DisableOtherDisplays()
+
+EndFunction
+
+Function DoUpdate(Int iScriptVersion)
+;Nothing here yet
+	DebugTrace("Upgrading to version " + iScriptVersion + "...")
+	DebugTrace("Upgrade complete!")
+EndFunction
+
 Function DoFirstLoadScan()
 ;
-; This is a hack on a number of reasons. The best way to do this would probably be to 
-; have a function in Legacy somewhere that always returns a list of all the formlists
-; that need to be checked, so they can be iterated. Or just merge this functionality
-; into Legacy directly.
+; Scan everything on the list and mark the Player as a Contributor. Important to make sure that
+; ONLY the Player's own, earned Displays are enabled before doing this, otherwise Displays might 
+; get misattributed.
 ;
 
 	DebugTrace("Scanning all displays...")
-	DBM_MCMScript MCMScript = Quest.GetQuest("DBM_MCMMenu") as DBM_MCMScript
-
-;DBM_DisplayLists (0x070e669a)
-	FormList DBM_DisplayLists = GetFormFromFile(0x000e669a, "LegacyoftheDragonborn.esp") as FormList
 	DBM_Utils.saveDisplayStatusList(DBM_DisplayLists)
-
-	; DBM_Utils.saveDisplayStatusList(MCMScript.DisplayActivators)
-	; DBM_Utils.saveDisplayStatusList(MCMScript.DBM_DaedricDisplays)
-	; DBM_Utils.saveDisplayStatusList(MCMScript.DBM_HOLEDisplays)
-	; DBM_Utils.saveDisplayStatusList(MCMScript.OddityDisplays)
-	; DBM_Utils.saveDisplayStatusList(MCMScript.DBM_HOSDisplays)
-	; DBM_Utils.saveDisplayStatusList(MCMScript.DBM_BCSDisplays)
-	; DBM_Utils.saveDisplayStatusList(MCMScript.DBM_UTDisplays)
-	; DBM_Utils.saveDisplayStatusList(MCMScript.DBM_JARDisplays)
-	; DBM_Utils.saveDisplayStatusList(MCMScript.DBM_ShellDisplays)
-	; DBM_Utils.saveDisplayStatusList(MCMScript.DBM_MILDisplays)
-	; DBM_Utils.saveDisplayStatusList(MCMScript.DBM_HeadsDisplays)
-	; DBM_Utils.saveDisplayStatusList(MCMScript.GemstoneDisplays)
-	; DBM_Utils.saveDisplayStatusList(MCMScript.DBM_FishDisplays)
-	; DBM_Utils.saveDisplayStatusList(MCMScript.DBM_MadMaskerDisplays)
-	; DBM_Utils.saveDisplayStatusList(MCMScript.DBM_AetherealDisplays)
-
-	TestData()
-
 	DebugTrace("...done!")
+
 EndFunction
 
-Function SetDisplaysActive()
+Function EnableActiveDisplays()
 ;
 ; This just activates all displays activated by other characters.
-; It does not DE-activate displays removed by other characters. That will takes
-; some additional work, either deactivating everything and reactivating it, or 
-; something extra in the SKSE plugin itself.
+; It does not DE-activate displays removed by other characters. 
+; Use DisableInactiveDisplays for that.
 ;
 
 	string sPlayerName = PlayerREF.GetActorBase().GetName()
@@ -90,34 +173,57 @@ Function SetDisplaysActive()
 
 EndFunction
 
+Function DisableOtherDisplays()
+;
+; This deactivates all displays that came from other characters.
+; Effectively resets the Museum to the normal state, with only the Player's stuff in it.
+;
+
+	string sPlayerName = PlayerREF.GetActorBase().GetName()
+
+	String[] sContributorList = DBM_Utils.getContributors()
+
+	Int n = 0
+	While n < sContributorList.length
+		If sPlayerName != sContributorList[n] ; Do not disable our own displays
+			ObjectReference[] kDisplayList = DBM_Utils.getActiveDisplays()
+			Int i = kDisplayList.Length
+			While i > 0
+				i -= 1
+				ObjectReference kDisplayObj = kDisplayList[i]
+				If kDisplayObj
+					If !kDisplayObj.IsDisabled()
+						DebugTrace("Disabling " + kDisplayObj + "!")
+						kDisplayObj.DisableNoWait(True)
+					EndIf
+				EndIf
+			EndWhile
+		EndIf
+		n += 1
+	EndWhile
+
+EndFunction
+
+
 Function DisableInactiveDisplays()
 ;
-; Get a list of all currently enabled displays that should be disabled, then 
-; disable them.
+; Disable all currently enabled displays that were turned off by other characters
 ;
 
 	DebugTrace("Scanning all displays for ones to disable...")
-	DBM_MCMScript MCMScript = Quest.GetQuest("DBM_MCMMenu") as DBM_MCMScript
-
-;DBM_DisplayLists (0x070e669a)
-	FormList DBM_DisplayLists = GetFormFromFile(0x000e669a, "LegacyoftheDragonborn.esp") as FormList
-	DisableArray(DBM_Utils.getUnwantedDisplays(DBM_DisplayLists))
-
-	; DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DisplayActivators))
-	; DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_DaedricDisplays))
-	; DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_HOLEDisplays))
-	; DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.OddityDisplays))
-	; DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_HOSDisplays))
-	; DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_BCSDisplays))
-	; DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_UTDisplays))
-	; DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_JARDisplays))
-	; DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_ShellDisplays))
-	; DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_MILDisplays))
-	; DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_HeadsDisplays))
-	; DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.GemstoneDisplays))
-	; DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_FishDisplays))
-	; DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_MadMaskerDisplays))
-	; DisableArray(DBM_Utils.getUnwantedDisplays(MCMScript.DBM_AetherealDisplays))
+	ObjectReference[] kDisableList = DBM_Utils.getUnwantedDisplays(DBM_DisplayLists)
+	DebugTrace("Excluding displays activated by the Player...")
+	ObjectReference[] kPlayerDisplayList = DBM_Utils.getActiveDisplays(PlayerREF.GetActorBase().GetName())
+	Int i = kPlayerDisplayList.Length
+	While i > 0
+		i -= 1
+		ObjectReference kObject = kPlayerDisplayList[i]
+		Int idx = kDisableList.Find(kObject)
+		If idx >= 0
+			kDisableList[idx] = None
+		EndIf
+	EndWhile
+	DisableArray(kDisableList)
 
 EndFunction
 
@@ -126,7 +232,9 @@ Function DisableArray(Objectreference[] akObjectList)
 	While n > 0
 		n -= 1
 		DebugTrace("Disabling " + akObjectList[n] + "!")
-		akObjectList[n].DisableNoWait(True)
+		If akObjectList[n]
+			akObjectList[n].DisableNoWait(True)
+		EndIf
 	EndWhile
 EndFunction
 

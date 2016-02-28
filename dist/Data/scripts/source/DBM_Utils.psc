@@ -2,8 +2,14 @@ Scriptname DBM_Utils Hidden
 {Series of utility functions provided by the SKSE plugin.}
 
 Int Function getScriptVersion() global
-{Return version of the script. Use to test for existence of the plugin, too.}
+{Return version of the script.}
 	Return 1
+EndFunction
+
+Int Function getSharingEnabled() global
+{Checks the value of the DBMV_SharingEnabled Global so it doesn't have to be added as a property.}
+	GlobalVariable DBMV_SharingEnabled = Game.GetFormFromFile(0x07183ba6, "LegacyOfTheDragonborn.esp") as GlobalVariable
+	Return (DBMV_SharingEnabled.GetValue() as Int)
 EndFunction
 
 Function TraceConsole(String asTrace) native global

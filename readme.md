@@ -1,0 +1,1 @@
+This is a version of Pesistent Legacy that's entirely integrated with the core of Legacy.
