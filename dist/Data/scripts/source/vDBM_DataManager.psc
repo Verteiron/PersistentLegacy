@@ -162,7 +162,7 @@ Function EnableActiveDisplays()
 				ObjectReference kDisplayObj = kDisplayList[i]
 				If kDisplayObj
 					If kDisplayObj.IsDisabled()
-						DebugTrace("Enabling " + kDisplayObj + "!")
+						;DebugTrace("Enabling " + kDisplayObj + "!")
 						kDisplayObj.EnableNoWait(True)
 					EndIf
 				EndIf
@@ -193,7 +193,7 @@ Function DisableOtherDisplays()
 				ObjectReference kDisplayObj = kDisplayList[i]
 				If kDisplayObj
 					If !kDisplayObj.IsDisabled()
-						DebugTrace("Disabling " + kDisplayObj + "!")
+						;DebugTrace("Disabling " + kDisplayObj + "!")
 						kDisplayObj.DisableNoWait(True)
 					EndIf
 				EndIf
@@ -210,9 +210,9 @@ Function DisableInactiveDisplays()
 ; Disable all currently enabled displays that were turned off by other characters
 ;
 
-	DebugTrace("Scanning all displays for ones to disable...")
+	;DebugTrace("Scanning all displays for ones to disable...")
 	ObjectReference[] kDisableList = DBM_Utils.getUnwantedDisplays(DBM_DisplayLists)
-	DebugTrace("Excluding displays activated by the Player...")
+	;DebugTrace("Excluding displays activated by the Player...")
 	ObjectReference[] kPlayerDisplayList = DBM_Utils.getActiveDisplays(PlayerREF.GetActorBase().GetName())
 	Int i = kPlayerDisplayList.Length
 	While i > 0
@@ -231,7 +231,7 @@ Function DisableArray(Objectreference[] akObjectList)
 	Int n = akObjectList.Length
 	While n > 0
 		n -= 1
-		DebugTrace("Disabling " + akObjectList[n] + "!")
+		;DebugTrace("Disabling " + akObjectList[n] + "!")
 		If akObjectList[n]
 			akObjectList[n].DisableNoWait(True)
 		EndIf
